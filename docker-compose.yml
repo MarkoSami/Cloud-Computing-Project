@@ -12,6 +12,8 @@ services:
       - POSTGRES_DB=mini_insta_pay
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mini-insta-net
 
   user-service:
     build: ./user-service
@@ -22,6 +24,8 @@ services:
       - DATABASE_URL=postgresql://admin:password@postgres:5432/mini_insta_pay
     depends_on:
       - postgres
+    networks:
+      - mini-insta-net
 
   transaction-service:
     build: ./transaction-service
@@ -32,6 +36,8 @@ services:
       - DATABASE_URL=postgresql://admin:password@postgres:5432/mini_insta_pay
     depends_on:
       - postgres
+    networks:
+      - mini-insta-net
 
   reporting-service:
     build: ./reporting-service
@@ -42,6 +48,29 @@ services:
       - DATABASE_URL=postgresql://admin:password@postgres:5432/mini_insta_pay
     depends_on:
       - postgres
+    networks:
+      - mini-insta-net
+      
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - mini-insta-net
 
 volumes:
   postgres_data:
+  prometheus_data:
+
+networks:
+  mini-insta-net:
+    driver: bridge

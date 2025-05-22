@@ -15,6 +15,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - mini-insta-net-dev
 
   user-service:
     build: ./user-service
@@ -33,6 +35,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - mini-insta-net-dev
 
   transaction-service:
     build: ./transaction-service
@@ -53,6 +57,8 @@ services:
         condition: service_healthy
       user-service:
         condition: service_started
+    networks:
+      - mini-insta-net-dev
 
   reporting-service:
     build: ./reporting-service
@@ -73,6 +79,29 @@ services:
         condition: service_healthy
       user-service:
         condition: service_started
+    networks:
+      - mini-insta-net-dev
+      
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-dev
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data_dev:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - mini-insta-net-dev
 
 volumes:
-  postgres_data_dev: 
+  postgres_data_dev:
+  prometheus_data_dev:
+  
+networks:
+  mini-insta-net-dev:
+    driver: bridge 

@@ -33,5 +33,5 @@ spec:
           ports:
             - containerPort: 8001
           env:
-            - name: MONGO_URL
-              value: mongodb://mongo:27017
+            - name: DATABASE_URL
+              value: postgresql://admin:password@postgres:5432/mini_insta_pay
